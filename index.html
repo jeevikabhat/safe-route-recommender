@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Safe Route Finder</title>
+</head>
+<body>
+
+<h2>Safe Route Finder</h2>
+
+<input id="start" placeholder="Start location">
+<input id="end" placeholder="End location">
+<button onclick="getRoutes()">Find Routes</button>
+
+<div id="results"></div>
+
+<hr>
+
+<h3>Submit Safety Report</h3>
+
+<input id="id" placeholder="Route ID">
+<input id="lighting" placeholder="Lighting (1-5)">
+<input id="crowd" placeholder="Crowd (1-5)">
+<input id="incident" placeholder="Incident (0/1)">
+<button onclick="submitReport()">Submit</button>
+
+<script>
+async function getRoutes() {
+    const start = document.getElementById("start").value;
+    const end = document.getElementById("end").value;
+
+    const res = await fetch(`http://127.0.0.1:5000/routes?start=${start}&end=${end}`);
+    const data = await res.json();
+
+    let output = "";
+
+    data.forEach(route => {
+        output += `
+            <div>
+                <h3>${route.route_name}</h3>
+                <p>Safety Score: ${route.safety_score.toFixed(2)}</p>
+            </div>
+        `;
+    });
+
+    document.getElementById("results").innerHTML = output;
+}
+
+async function submitReport() {
+    await fetch("http://127.0.0.1:5000/report", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+            id: document.getElementById("id").value,
+            lighting_score: document.getElementById("lighting").value,
+            crowd_score: document.getElementById("crowd").value,
+            incident_flag: document.getElementById("incident").value
+        })
+    });
+
+    alert("Report submitted!");
+}
+</script>
+
+</body>
+</html>
